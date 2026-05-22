@@ -1,0 +1,12 @@
+name: web_bundler
+description: A CLI tool to bundle web apps into Dart executables.
+version: 1.0.0
+environment:
+  sdk: '>=3.10.1 <4.0.0'
+
+dependencies:
+  args: ^2.4.2
+  path: ^1.9.1
+
+dev_dependencies:
+  lints: ^2.1.0
