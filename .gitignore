@@ -1,41 +1,24 @@
 ```
-# Flutter/Dart specific ignores
+# Dart/Flutter specific
 .dart_tool/
 .build/
-packages/
-*.iws
-*.sw
-*.swp
-*.swo
-*.tmp
-*.log
-*.tmp
-*.bak
-*.swp
-*~
-.DS_Store
-Thumbs.db
-
-# Dependencies
-.pub/
+.packages
 pubspec.lock
 
-# Build outputs
-build/
-bin/
-
-# IDE specific
-.idea/
+# IDE
 .vscode/
-*.iml
-*.ipr
-*.iws
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
 
 # Environment
 .env
 .env.local
-*.env*
+*.env.*
 
-# Logs
-*.log
+# Dependencies
+node_modules/
 ```
