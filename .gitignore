@@ -1,54 +1,24 @@
-# Files and directories created by pub
+```
+# Dart/Flutter specific
 .dart_tool/
+.build/
 .packages
-build/
 pubspec.lock
 
-# Conventional directory for build outputs
-dist/
-
-# Omit committing pubspec.lock for library packages
-# https://dart.dev/guides/libraries/private-files#pubspeclock
-
-# Directory created by dartdoc
-doc/api/
-
-# dotenv environment variables file
-.env*
-
-# Avoid committing generated Javascript files
-*.dart.js
-*.info.json
-*.js
-*.js_
-*.js.deps
-*.js.map
-
-# IDE and editor files
-.idea/
-*.iml
-*.ipr
-*.iws
+# IDE
 .vscode/
+.idea/
 *.swp
 *.swo
-*~
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# Test coverage
-coverage/
-
-# Compiled executables
-capsule_server
-*.exe
-*.app
-
-# Temporary files
-*.tmp
-*.temp
+# Logs
 *.log
 
-# Made with Bob
+# Environment
+.env
+.env.local
+*.env.*
+
+# Dependencies
+node_modules/
+```
