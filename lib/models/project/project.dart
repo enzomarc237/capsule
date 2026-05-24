@@ -7,7 +7,7 @@ class Project {
   final String author;
   final String license;
   final String sourcePath;
-  final DateTime created at;
+  final DateTime createdAt;
   final DateTime updatedAt;
   final ProjectConfig config;
   final List<Asset> assets;
