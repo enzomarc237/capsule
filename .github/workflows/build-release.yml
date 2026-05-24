@@ -1,14 +1,16 @@
-name: Build and Release Capsule 2.0
+name: Build and Release Capsule 2.1+
 
 on:
   push:
     tags:
       - 'v*'
+    branches:
+      - 'claude/continue-v21-plus-development'
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build ${{ matrix.platform }} (${{ matrix.arch }})
+  build-cli:
+    name: Build CLI ${{ matrix.platform }} (${{ matrix.arch }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -17,21 +19,21 @@ jobs:
           - os: macos-13
             platform: macos
             arch: x64
-            artifact: capsule_macos_x64
+            artifact: capsule_cli_macos_x64
           - os: macos-14
             platform: macos
             arch: arm64
-            artifact: capsule_macos_arm64
+            artifact: capsule_cli_macos_arm64
           # Linux builds
           - os: ubuntu-latest
             platform: linux
             arch: x64
-            artifact: capsule_linux_x64
+            artifact: capsule_cli_linux_x64
           # Windows builds
           - os: windows-latest
             platform: windows
             arch: x64
-            artifact: capsule_windows_x64.exe
+            artifact: capsule_cli_windows_x64.exe
 
     steps:
       - name: Checkout code
@@ -52,7 +54,7 @@ jobs:
         run: dart test || echo "No tests defined yet"
         continue-on-error: true
 
-      - name: Build Capsule 2.0
+      - name: Build Capsule 2.0 CLI
         run: dart compile exe bin/capsule_v2.dart -o ${{ matrix.artifact }}
 
       - name: Test executable (Unix)
@@ -73,9 +75,93 @@ jobs:
           path: ${{ matrix.artifact }}
           retention-days: 7
 
+  build-flutter-gui:
+    name: Build Flutter GUI ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # macOS builds
+          - os: macos-13
+            platform: macos
+            artifact: capsule_gui_macos_x64
+            flutter_build: flutter build macos --release
+          - os: macos-14
+            platform: macos
+            artifact: capsule_gui_macos_arm64
+            flutter_build: flutter build macos --release
+          # Linux builds
+          - os: ubuntu-latest
+            platform: linux
+            artifact: capsule_gui_linux_x64
+            flutter_build: flutter build linux --release
+          # Windows builds
+          - os: windows-latest
+            platform: windows
+            artifact: capsule_gui_windows_x64
+            flutter_build: flutter build windows --release
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev
+
+      - name: Get Flutter dependencies
+        working-directory: flutter_app
+        run: flutter pub get
+
+      - name: Build Flutter GUI
+        working-directory: flutter_app
+        run: ${{ matrix.flutter_build }}
+
+      - name: Package Linux build
+        if: runner.os == 'Linux'
+        working-directory: flutter_app/build/linux/x64/release/bundle
+        run: |
+          tar -czf ../../../../../${{ matrix.artifact }}.tar.gz *
+
+      - name: Package macOS build
+        if: runner.os == 'macOS'
+        working-directory: flutter_app/build/macos/Build/Products/Release
+        run: |
+          zip -r ../../../../../${{ matrix.artifact }}.zip capsule_gui.app
+
+      - name: Package Windows build
+        if: runner.os == 'Windows'
+        working-directory: flutter_app/build/windows/x64/runner/Release
+        run: |
+          Compress-Archive -Path * -DestinationPath ../../../../../${{ matrix.artifact }}.zip
+
+      - name: Upload artifact (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: flutter_app/${{ matrix.artifact }}.tar.gz
+          retention-days: 7
+
+      - name: Upload artifact (macOS/Windows)
+        if: runner.os != 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: flutter_app/${{ matrix.artifact }}.zip
+          retention-days: 7
+
   create-release:
-    name: Create Release
-    needs: build
+    name: Create Release Draft
+    needs: [build-cli, build-flutter-gui]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     permissions:
@@ -110,19 +196,28 @@ jobs:
           find artifacts -type f -exec cp {} release/ \;
           ls -lh release/
 
-      - name: Create Release
+      - name: Create Release Draft
         uses: softprops/action-gh-release@v1
         with:
           files: release/*
           draft: true
           generate_release_notes: true
           body: |
-            # Capsule 2.0 - Desktop App Bundler
+            # Capsule 2.1+ - Desktop App Bundler with Flutter GUI 🚀
 
-            Transform web applications into standalone desktop executables with ease!
+            Transform web applications into standalone desktop executables with a beautiful graphical interface!
 
-            ## 🚀 What's New in 2.0
+            ## ✨ What's New in 2.1+
 
+            ### 🎨 Flutter GUI Application (NEW!)
+            - **Native Desktop Interface**: Beautiful cross-platform GUI built with Flutter
+            - **Live Preview Window**: See your web app in real-time with integrated WebView
+            - **Drag & Drop**: Easy project import and configuration
+            - **Visual Build Progress**: Watch the 6-stage pipeline with detailed logging
+            - **Multi-Platform Configuration**: Select and build for multiple targets simultaneously
+            - **Modern UI/UX**: Clean, professional interface following Material Design
+
+            ### 🔧 CLI Enhancements (v2.0 Foundation)
             - **6-Stage Build Pipeline**: Validation → Preparation → Code Generation → Compilation → Packaging → Verification
             - **Enhanced Architecture**: Modular design with clear separation of concerns
             - **Rich CLI Experience**: Beautiful progress tracking and detailed build logs
@@ -131,41 +226,82 @@ jobs:
 
             ## 📦 Downloads
 
-            Choose the appropriate binary for your platform:
+            ### 🖥️ GUI Application (Recommended for most users)
+            - **macOS Intel (x64)**: `capsule_gui_macos_x64.zip`
+            - **macOS Apple Silicon (ARM64)**: `capsule_gui_macos_arm64.zip`
+            - **Linux (x64)**: `capsule_gui_linux_x64.tar.gz`
+            - **Windows (x64)**: `capsule_gui_windows_x64.zip`
 
-            - **macOS Intel (x64)**: `capsule_macos_x64`
-            - **macOS Apple Silicon (ARM64)**: `capsule_macos_arm64`
-            - **Linux (x64)**: `capsule_linux_x64`
-            - **Windows (x64)**: `capsule_windows_x64.exe`
+            ### ⌨️ CLI Tool (For automation and advanced users)
+            - **macOS Intel (x64)**: `capsule_cli_macos_x64`
+            - **macOS Apple Silicon (ARM64)**: `capsule_cli_macos_arm64`
+            - **Linux (x64)**: `capsule_cli_linux_x64`
+            - **Windows (x64)**: `capsule_cli_windows_x64.exe`
 
             ## 🔐 Verification
 
-            SHA256 checksums are provided for each binary (`.sha256` files).
+            SHA256 checksums are provided for all binaries (`.sha256` files).
 
             ## 📖 Usage
 
+            ### GUI Application
+            ```bash
+            # Extract and run the GUI application
+            # macOS
+            unzip capsule_gui_macos_x64.zip
+            open capsule_gui.app
+
+            # Linux
+            tar -xzf capsule_gui_linux_x64.tar.gz
+            ./capsule_gui
+
+            # Windows
+            # Extract the ZIP and double-click capsule_gui.exe
+            ```
+
+            ### CLI Tool
             ```bash
             # Basic usage
-            ./capsule_macos_x64 -i ./my-web-app
+            ./capsule_cli_macos_x64 -i ./my-web-app
 
             # With custom output and name
-            ./capsule_macos_x64 -i ./dist -o ./build -n "My App"
+            ./capsule_cli_macos_x64 -i ./dist -o ./build -n "My App"
 
             # Verbose output
-            ./capsule_macos_x64 -i ./dist -v
+            ./capsule_cli_macos_x64 -i ./dist -v
             ```
 
             ## 📚 Documentation
 
-            Full documentation is available in the repository.
+            Full documentation is available in the repository:
+            - [README_V2.md](https://github.com/enzomarc237/capsule/blob/main/README_V2.md) - CLI documentation
+            - [flutter_app/README.md](https://github.com/enzomarc237/capsule/blob/main/flutter_app/README.md) - GUI documentation
+            - [CHANGELOG.md](https://github.com/enzomarc237/capsule/blob/main/CHANGELOG.md) - Complete changelog
+
+            ## 🛣️ Roadmap
+
+            ### Coming in v2.2
+            - Auto-update mechanism for bundled applications
+            - Code signing configuration UI
+            - Template marketplace
+            - Advanced build configurations
 
             ## 🐛 Known Issues
 
-            None reported yet. Please report any issues on GitHub.
+            - Flutter GUI is in beta - some features are still under development
+            - Live preview may not work for all web frameworks
+            - Please report issues on [GitHub Issues](https://github.com/enzomarc237/capsule/issues)
+
+            ## 🙏 Acknowledgments
+
+            Built with ❤️ using:
+            - **Dart** for the build engine
+            - **Flutter** for the GUI
+            - **GitHub Actions** for CI/CD
 
             ---
 
-            **Built with ❤️ using Dart**
+            **Note**: This is an automated release draft. Please review and edit before publishing.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
