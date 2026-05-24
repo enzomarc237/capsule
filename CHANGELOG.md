@@ -5,6 +5,50 @@ All notable changes to Capsule will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-05-24
+
+### 🎨 Added - Flutter GUI Application (Phase 2)
+
+#### New GUI Application
+- **Complete Flutter Desktop App**: Native cross-platform GUI for Windows, macOS, and Linux
+- **Welcome Screen**: Recent projects, quick start guide, new project creation
+- **Project Setup Wizard**: Visual configuration with drag & drop, auto-detection, icon upload
+- **Workspace Screen**: Split-panel layout with live preview and configuration
+- **Build Progress Screen**: Visual 6-stage pipeline with real-time logs
+- **Success Screen**: Build summary, quick actions, and next steps
+
+#### Design System & UX
+- Material Design 3 with custom color palette
+- Light and dark theme support
+- Inter and JetBrains Mono fonts
+- Professional, accessible interface
+
+#### Live Preview Window
+- Integrated WebView for real-time web app preview
+- Browser-like controls and error handling
+- Support for modern frameworks and static HTML
+
+#### Updated CI/CD Pipeline
+- Separate build jobs for CLI and GUI
+- Multi-platform Flutter builds (macOS x64/ARM64, Linux, Windows)
+- Automated packaging and checksum generation
+- Enhanced release draft with v2.1+ features
+
+#### Documentation
+- `flutter_app/README.md` - Flutter app guide
+- `README_V2.1.md` - Complete v2.1 documentation
+- `CAPSULE_V2.1_SUMMARY.md` - Development summary
+
+### Changed
+- GitHub Actions renamed to "Build and Release Capsule 2.1+"
+- Artifacts now prefixed: `capsule_cli_*` and `capsule_gui_*`
+- Workflow triggers on v2.1+ development branch
+
+### Technical
+- Flutter SDK 3.19.0+
+- Dependencies: flutter_riverpod, file_picker, webview_flutter, window_manager
+- MVVM architecture with Riverpod state management
+
 ## [2.0.0] - 2026-05-24
 
 ### 🎉 Major Release - Complete Rewrite
