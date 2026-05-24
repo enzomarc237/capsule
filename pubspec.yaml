@@ -1,12 +1,23 @@
-name: web_bundler
-description: A CLI tool to bundle web apps into Dart executables.
-version: 1.0.0
+name: capsule
+description: A GUI desktop application bundler that transforms web applications into standalone, native desktop executables.
+version: 2.0.0
 environment:
   sdk: '>=3.10.1 <4.0.0'
 
 dependencies:
   args: ^2.4.2
   path: ^1.9.1
+  http: ^1.2.0
+  shelf: ^1.4.1
+  shelf_static: ^1.1.2
+  mime: ^1.0.5
+  uuid: ^4.3.3
+  crypto: ^3.0.3
+  yaml: ^3.1.2
+  intl: ^0.19.0
+  archive: ^3.4.10
+  image: ^4.1.7
 
 dev_dependencies:
-  lints: ^2.1.0
+  lints: ^3.0.0
+  test: ^1.25.2
