@@ -5,6 +5,16 @@
 [![Dart Version](https://img.shields.io/badge/Dart-%3E%3D3.10.1-blue.svg)](https://dart.dev)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
+## 🎉 Capsule 2.0 is Here!
+
+**Capsule has been completely rewritten with a robust 6-stage build pipeline, modular architecture, and enterprise-grade features!**
+
+👉 **[See Capsule 2.0 Documentation](README_V2.md)** for the latest features and usage.
+
+---
+
+## About Capsule
+
 Capsule transforms your web applications into single executable files that include everything needed to serve them - no external dependencies, no separate web server, no configuration files. Just one file that runs anywhere.
 
 ## ✨ Features
