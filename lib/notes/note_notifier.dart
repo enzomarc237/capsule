@@ -89,6 +89,10 @@ class NoteNotifier extends StateNotifier<NotesState> {
 
     final persisted = await _repository.save(editing);
     final notes = await _repository.listNotes();
+    if (!identical(state.editingNote, editing)) {
+      state = state.copyWith(notes: notes);
+      return persisted;
+    }
     state = state.copyWith(notes: notes, editingNote: persisted);
     return persisted;
   }
