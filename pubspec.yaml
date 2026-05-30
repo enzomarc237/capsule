@@ -6,7 +6,9 @@ environment:
 
 dependencies:
   args: ^2.4.2
+  hive: ^2.2.3
   path: ^1.9.1
+  riverpod: ^2.6.1
 
 dev_dependencies:
   lints: ^2.1.0
